@@ -1,9 +1,9 @@
 Version: 1
-Previous: 145989faa4f3307fc0679e76191663963067480f
-Head: 357d9a3ee7e3ae3948cd57445e2080b58e420d9e
+Previous: 3b52affd54d124c1cd62b5975c8d98e436038b59
+Head: 254b9ffbf82cd50702d7477b661063ca235e3fc6
 Applied:
-  refactor-serve-at-the-root: 9f56fe6064131d14b64baf05af2dbb746809ac46
-  feat-serve-add-new-scan-ui: f87a840c3eb0655b2a3f3f26ecee62822d62c745
-  feat-serve-add-new-bundle-ui: 357d9a3ee7e3ae3948cd57445e2080b58e420d9e
+  refactor-serve-at-the-root: b8b9119119b878a68dc4661574b1703e3f47ed63
+  feat-serve-add-new-scan-ui: 85bf47a0a97c09a5ec3c1e63b478c76e3229d783
+  feat-serve-add-new-bundle-ui: 254b9ffbf82cd50702d7477b661063ca235e3fc6
 Unapplied:
 Hidden:
