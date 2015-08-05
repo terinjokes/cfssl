@@ -1,0 +1,71 @@
+Bottom: ddd0191ac4d7c080b9a2dc768c3efa6fd43c878e
+Top:    7720e720ea71c0f1db309ad7a83a01d3c43a8d5d
+Author: Terin Stock <terinjokes@gmail.com>
+Date:   2015-08-04 09:53:34 -0700
+
+refactor(serve): at the root directory, always send index.html
+
+This allows the web application to use the pushState API, and the server
+will be able to load the initial page if the use reloads.
+
+
+---
+
+diff --git a/cli/serve/serve.go b/cli/serve/serve.go
+index 51fdc4f..a63c397 100644
+--- a/cli/serve/serve.go
++++ b/cli/serve/serve.go
+@@ -23,6 +23,7 @@ import (
+ 	"github.com/cloudflare/cfssl/ubiquity"
+ 
+ 	rice "github.com/GeertJohan/go.rice"
++	"io"
+ )
+ 
+ // Usage text of 'cfssl serve'
+@@ -46,6 +47,20 @@ var (
+ 
+ var errBadSigner = errors.New("signer not initialized")
+ 
++type SPABox struct {
++	*rice.Box
++}
++
++func (rb *SPABox) ServeHTTP(w http.ResponseWriter, r *http.Request) {
++	file, err := rb.Box.Open("/index.html")
++	if err != nil {
++		panic(err)
++	}
++	defer file.Close()
++
++	io.Copy(w, file)
++}
++
+ var v1Endpoints = map[string]func() (http.Handler, error){
+ 	"sign": func() (http.Handler, error) {
+ 		if s == nil {
+@@ -95,9 +110,15 @@ var v1Endpoints = map[string]func() (http.Handler, error){
+ 		return scan.NewInfoHandler(), nil
+ 	},
+ 
+-	"/": func() (http.Handler, error) {
++	"/assets/": func() (http.Handler, error) {
+ 		return http.FileServer(rice.MustFindBox("static").HTTPBox()), nil
+ 	},
++
++	"/": func() (http.Handler, error) {
++		box := rice.MustFindBox("static")
++		rb := &SPABox{box}
++		return rb, nil
++	},
+ }
+ 
+ // v1APIPath prepends the V1 API prefix to endpoints not
+@@ -112,7 +133,7 @@ func v1APIPath(endpoint string) string {
+ // registerHandlers instantiates various handlers and associate them to corresponding endpoints.
+ func registerHandlers() {
+ 	for path, getHandler := range v1Endpoints {
+-		if path != "/" {
++		if !strings.HasPrefix(path, "/") {
+ 			path = "/api/v1/cfssl/" + path
+ 		}
